@@ -51,6 +51,7 @@
 
             .order-box {
                 width: 500px;
+                margin-bottom: 40px;
             }
 
             .mybtn {
@@ -76,30 +77,72 @@
                     data: {},
                     success: function (response) {
                         let nowRate = response[1]['rate'];
-                    $('#rate-box').text(nowRate)
+                        $('#rate-box').text(nowRate)
                     }
                 })
-
+                order_listing();
             });
 
-            function order() {
-                let name = $('#order-name').val();
-                let count = $('#order-count').val();
-                let address = $('#order-address').val();
-                let phone = $('#order-phone').val();
+            function order_listing() {
+                $.ajax({
+                    type: "GET",
+                    url: "/order",
+                    data: {},
+                    success: function (response) {
+                        let orders = response['orders'];
+                        for (let i = 0; i < orders.lengthl; i++) {
+                            let name = orders[i]['name'];
+                            let count = orders[i]['count'];
+                            let address = orders[i]['address'];
+                            let phone = orders[i]['phone'];
 
-                if (name == '') {
-                    alert('이름을 입력하세요');
-                } else if (count == '-- 수량을 선택하세요 --') {
-                    alert('수량을 입력하세요');
-                } else if (address == '') {
-                    alert('주소를 입력하세요');
-                } else if (phone == '') {
-                    alert('전화번호를 입력하세요');
-                } else {
-                    alert('주문이 완료되었습니다')
+                            let_temp_html = `<tr>
+                                                <th scope="row">${name}</th>
+                                                <td>${count}</td>
+                                                <td>${address}</td>
+                                                <td>${phone}</td>
+                                             </tr>`
+                            $('#order-list-box').append(temp_html)
+                            console.log(name, count, address, phone)
+                        }
+                    }
                 }
-            }
+
+                function order() {
+                    let name = $('#order-name').val();
+                    let count = $('#order-count').val();
+                    let address = $('#order-address').val();
+                    let phone = $('#order-phone').val();
+
+                    if (name == '') {
+                        alert('이름을 입력하세요');
+                    } else if (count == '-- 수량을 선택하세요 --') {
+                        alert('수량을 입력하세요');
+                    } else if (address == '') {
+                        alert('주소를 입력하세요');
+                    } else if (phone == '') {
+                        alert('전화번호를 입력하세요');
+                    } else {
+                        $.ajex({
+                            type: "POST",
+                            url: "/order",
+                            data: {
+                                'name_give': name,
+                                'count_give': count,
+                                'address_give': address,
+                                'phone_give': phone
+                            },
+                            success: function (response) {
+                                if (response["result"] == "success") {
+                                    alert(response["msg"]);
+                                    window.location.reload();
+                                }
+                            }
+
+                        })
+
+                    }
+                }
         </script>
     </head>
 
@@ -111,7 +154,7 @@
             <span class="price">가격:47,500원/개 </span>
             <p class="price">당신의 소중한 필기구를 가죽 필통에 보관하세요. 시간이 지날수록 부드럽고 더욱 멋있어지는 가죽만의 매력을 느낄 수 있습니다.</p>
 
-            <p class="rate">달러-원 환율:<span id="rate-box" >1,000</span></p>
+            <p class="rate">달러-원 환율:<span id="rate-box">1,000</span></p>
         </div>
         <div class="order-box">
             <div class="input-group mb-3">
@@ -150,6 +193,18 @@
             </div>
             <button onclick="order()" type="button" class="btn btn-primary mybtn">주문하기</button>
         </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">이름</th>
+                    <th scope="col">수량</th>
+                    <th scope="col">주소</th>
+                    <th scope="col">전화번호</th>
+                </tr>
+            </thead>
+            <tbody id="order-list-box">
+            </tbody>
+        </table>
 
         </div>
     </body>
